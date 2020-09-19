@@ -1,0 +1,33 @@
+import os
+import argparse
+import numpy as np
+import matplotlib.pyplot as plt
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import Input
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Dropout
+from tensorflow.keras.layers import Flatten
+from sklearn.preprocessing import Binarizer
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.layers import AveragePooling2D
+from tensorflow.keras.applications import MobileNetV2
+from tensorflow.keras.preprocessing.image import load_img
+from tensorflow.keras.preprocessing.image import img_to_array
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report
+from imutils import paths
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-d", "--dataset", required=True, help="Path to input dataset")
+parser.add_argument("-p", "--plot", type=str, default=plot.png, help="Path to output loss or accuracy plot")
+parser.add_argument("-m", "--model", type=str, default="mask_detector.model", help="Path to output face mask detector model")
+args = parser.parse_args()
+
+#Initialize initial learning rate, number of epochs and batch size
+INIT_LR = le-4
+EPOCHS = 20
+BS = 32
