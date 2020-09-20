@@ -42,7 +42,7 @@ labels = []
 for imagepath in imagepaths:
     label = imagedirs.split(os.path.step)[-2]
 
-    image = load_img(imagepaths, target_size=224,224)
+    image = load_img(imagepaths, target_size=(224,224))
     image = img_to_array(image)
     image = preprocess_input(image)
 
@@ -67,3 +67,35 @@ aug = ImageDataGenerator(
     horizontal_flip=True,
     fill_mode="nearest"
 )
+
+basemodel = MobileNetV2(weight="imagenet", include_top=False, input_tensor=Input(shape=(224, 224, 3)))
+headmodel = basemodel.output
+headmodel = AveragePooling2D(pool_size=(7, 7))(headmodel)
+headmodel = Flatten(name="flatten")(headmodel)
+headmodel = Dense(128, activation="relu")(headmodel)
+headmodel = Dropout(0.5)(headmodel)
+headmodel = Dense(2, activation="softmax")(headmodel)
+
+model = Model(inputs=basemodel.input, outputs=headmodel)
+
+print("[INFO] Compiling the model...")
+opt = Adam(lr=INIT_LR, decay=INIT_LR/EPOCHS)
+model.compile(loss=binary_crossentropy, optimizer=opt, metrics=["accuracy"])
+
+print("[INFO] Training head of model...")
+HM = model.fit(
+    aug.flow(trainX, trainY, batch_size=BS),
+    steps_per_epoch=len(trainX) // BS,
+    validation_data=(testX, testY),
+    validation_steps=len(testX) // BS,
+    epochs=EPOCHS
+)
+
+print("[INFO] Evaluation of model...")
+predidxs = model.predict(testX, batch_size=BS)
+predidxs = np.argmax(predidxs, axis=1)
+
+print(classification_report(testY.argmax(axis=1), predidxs, target_names=lb.classes_))
+
+print("[INFO] saving mask detector model...")
+model.save(args["model"], save_format=h5)
