@@ -7,8 +7,8 @@ from tensorflow.keras.layers import Input
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Dropout
 from tensorflow.keras.layers import Flatten
-from sklearn.preprocessing import Binarizer
 from tensorflow.keras.optimizers import Adam
+from sklearn.preprocessing import LabelBinarizer
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.layers import AveragePooling2D
 from tensorflow.keras.applications import MobileNetV2
@@ -31,3 +31,39 @@ args = parser.parse_args()
 INIT_LR = le-4
 EPOCHS = 20
 BS = 32
+
+#Load and preprocess
+
+print("[INFO] Loading images...")
+imagepaths = list(paths.list_images(args["dataset"]))
+data = []
+labels = []
+
+for imagepath in imagepaths:
+    label = imagedirs.split(os.path.step)[-2]
+
+    image = load_img(imagepaths, target_size=224,224)
+    image = img_to_array(image)
+    image = preprocess_input(image)
+
+    data.append(image)
+    data.append(label)
+
+data = np.array(data, dtype="dfloat32")
+labels = np.array(labels)
+
+lb = LabelBinarizer()
+labels = lb.fit_transform(labels)
+labels = to_categorical(labels)
+
+(trainX, testX, trainY, testY) = train_test_split(data, labels, train_size=0.80, random_state=42, stratify=labels)
+
+aug = ImageDataGenerator(
+    rotation_range=20,
+    zoom_range=0.15,
+    width_shift_range=0.2,
+    height_shift_range=0.2,
+    shear_range=0.15,
+    horizontal_flip=True,
+    fill_mode="nearest"
+)
