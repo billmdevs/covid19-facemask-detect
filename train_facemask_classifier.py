@@ -23,17 +23,16 @@ from imutils import paths
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--dataset", required=True, help="Path to input dataset")
-parser.add_argument("-p", "--plot", type=str, default=plot.png, help="Path to output loss or accuracy plot")
+parser.add_argument("-p", "--plot", type=str, default="plot.png", help="Path to output loss or accuracy plot")
 parser.add_argument("-m", "--model", type=str, default="mask_detector.model", help="Path to output face mask detector model")
-args = parser.parse_args()
+args = vars(parser.parse_args())
 
 #Initialize initial learning rate, number of epochs and batch size
-INIT_LR = le-4
+INIT_LR = 1e-4
 EPOCHS = 20
 BS = 32
 
 #Load and preprocess
-
 print("[INFO] Loading images...")
 imagepaths = list(paths.list_images(args["dataset"]))
 data = []
@@ -96,6 +95,18 @@ predidxs = model.predict(testX, batch_size=BS)
 predidxs = np.argmax(predidxs, axis=1)
 
 print(classification_report(testY.argmax(axis=1), predidxs, target_names=lb.classes_))
-
 print("[INFO] saving mask detector model...")
 model.save(args["model"], save_format=h5)
+
+N = EPOCHS
+plt.style.use("ggplot")
+plt.figure()
+plt.plot(np.arange(0, N), HM.history["loss"], label="train_loss")
+plt.plot(np.arange(0, N), HM.history["val_loss"], label="val_loss")
+plt.plot(np.arange(0, N), HM.history["accuracy"], label="train_acc")
+plt.plot(np.arange(0, N), HM.history["val_acc"], label="val_acc")
+plt.title("Training Loss and Accuracy")
+plt.xlabel("Epoch #")
+plt.ylabel("Loss/Accuracy")
+plt.legend(loc="lower left")
+plt.savefig(args["plot"])
