@@ -39,16 +39,16 @@ data = []
 labels = []
 
 for imagepath in imagepaths:
-    label = imagedirs.split(os.path.step)[-2]
+    label = imagepath.split(os.path.sep)[-2]
 
-    image = load_img(imagepaths, target_size=(224,224))
+    image = load_img(imagepath, target_size=(224,224))
     image = img_to_array(image)
     image = preprocess_input(image)
 
     data.append(image)
-    data.append(label)
+    labels.append(label)
 
-data = np.array(data, dtype="dfloat32")
+data = np.array(data, dtype="float32")
 labels = np.array(labels)
 
 lb = LabelBinarizer()
@@ -67,7 +67,7 @@ aug = ImageDataGenerator(
     fill_mode="nearest"
 )
 
-basemodel = MobileNetV2(weight="imagenet", include_top=False, input_tensor=Input(shape=(224, 224, 3)))
+basemodel = MobileNetV2(weights="imagenet", include_top=False, input_tensor=Input(shape=(224, 224, 3)))
 headmodel = basemodel.output
 headmodel = AveragePooling2D(pool_size=(7, 7))(headmodel)
 headmodel = Flatten(name="flatten")(headmodel)
@@ -79,7 +79,7 @@ model = Model(inputs=basemodel.input, outputs=headmodel)
 
 print("[INFO] Compiling the model...")
 opt = Adam(lr=INIT_LR, decay=INIT_LR/EPOCHS)
-model.compile(loss=binary_crossentropy, optimizer=opt, metrics=["accuracy"])
+model.compile(loss="binary_crossentropy", optimizer=opt, metrics=["accuracy"])
 
 print("[INFO] Training head of model...")
 HM = model.fit(
@@ -94,9 +94,10 @@ print("[INFO] Evaluation of model...")
 predidxs = model.predict(testX, batch_size=BS)
 predidxs = np.argmax(predidxs, axis=1)
 
+
 print(classification_report(testY.argmax(axis=1), predidxs, target_names=lb.classes_))
 print("[INFO] saving mask detector model...")
-model.save(args["model"], save_format=h5)
+model.save(args["model"], save_format="h5")
 
 N = EPOCHS
 plt.style.use("ggplot")
@@ -104,7 +105,7 @@ plt.figure()
 plt.plot(np.arange(0, N), HM.history["loss"], label="train_loss")
 plt.plot(np.arange(0, N), HM.history["val_loss"], label="val_loss")
 plt.plot(np.arange(0, N), HM.history["accuracy"], label="train_acc")
-plt.plot(np.arange(0, N), HM.history["val_acc"], label="val_acc")
+plt.plot(np.arange(0, N), HM.history["val_accuracy"], label="val_acc")
 plt.title("Training Loss and Accuracy")
 plt.xlabel("Epoch #")
 plt.ylabel("Loss/Accuracy")
