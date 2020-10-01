@@ -77,6 +77,9 @@ headmodel = Dense(2, activation="softmax")(headmodel)
 
 model = Model(inputs=basemodel.input, outputs=headmodel)
 
+for layer in basemodel.layers:
+    layer.trainable = False
+
 print("[INFO] Compiling the model...")
 opt = Adam(lr=INIT_LR, decay=INIT_LR/EPOCHS)
 model.compile(loss="binary_crossentropy", optimizer=opt, metrics=["accuracy"])
@@ -94,10 +97,10 @@ print("[INFO] Evaluation of model...")
 predidxs = model.predict(testX, batch_size=BS)
 predidxs = np.argmax(predidxs, axis=1)
 
-
 print(classification_report(testY.argmax(axis=1), predidxs, target_names=lb.classes_))
 print("[INFO] saving mask detector model...")
 model.save(args["model"], save_format="h5")
+
 
 N = EPOCHS
 plt.style.use("ggplot")
@@ -111,3 +114,8 @@ plt.xlabel("Epoch #")
 plt.ylabel("Loss/Accuracy")
 plt.legend(loc="lower left")
 plt.savefig(args["plot"])
+
+report = classification_report(testY.argmax(axis=1), predidxs, target_names=lb.classes_)
+eval_model_report = open('report.txt', 'w+')
+eval_model_report.write(report)
+eval_model_report.close()
