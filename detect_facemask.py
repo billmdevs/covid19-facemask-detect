@@ -1,6 +1,6 @@
 # For video feeds
 
-from tensorflow.keras.mobilenet_v2 import preprocess_input
+from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 from tensorflow.keras.preprocessing.image import img_to_array
 from tensorflow.keras.models import load_model
 from imutils.video import VideoStream
@@ -12,17 +12,17 @@ import cv2
 import os
 
 
-def det_pred_mask(frame, facenet, masknet):
+def detect_mask(frame, facenet, masknet):
     (h, w) = frame.shape[:2]
     blob = cv2.dnn.blobFromImage(frame, 1.0, (300, 300), (104.0, 177.0, 123.0))
-    facenet.setinput(blob)
+    facenet.setInput(blob)
     detections = facenet.forward()
 
     faces = []
     locs = []
     preds = []
 
-    for i in range(0, detections.shape[:2]):
+    for i in range(0, detections.shape[2]):
         confidence = detections[0, 0, i, 2]
 
         if confidence > args["confidence"]:
@@ -44,7 +44,7 @@ def det_pred_mask(frame, facenet, masknet):
 
     if len(faces) > 0:
         faces = np.array(faces, dtype="float32")
-        preds = masknet.predict(faces, batchsize=32)
+        preds = masknet.predict(faces, batch_size=32)
 
     return (preds, locs)
 
@@ -59,7 +59,7 @@ args = vars(parser.parse_args())
 
 print("[INFO] Loading face detector model")
 prototxtpath = os.path.sep.join([args["face"], "deploy.prototxt"])
-weightspath = os.path.join([args["face"], "res10_300x300_ssd_iter_140000.caffeemodel"])
+weightspath = os.path.sep.join([args["face"], "res10_300x300_ssd_iter_140000.caffemodel"])
 facenet = cv2.dnn.readNet(prototxtpath, weightspath)
 
 print("[INFO] Loading face mask detector model...")
@@ -73,7 +73,7 @@ while True:
     frame = vidstream.read()
     frame = imutils.resize(frame, width=400)
 
-    (preds, locs) = det_pred_mask(frame, facenet, masknet)
+    (preds, locs) = detect_mask(frame, facenet, masknet)
 
     for (pred, box) in zip(preds, locs):
         (startX, startY, endX, endY) = box
@@ -91,7 +91,7 @@ while True:
         
         label = "{}: {:.2f}%".format(label, max(withmask, withoutmask) * 100)
 
-        cv2.putText(frame, label, (startX, startY - 10), cv2.FONT_HERSEY_SIMPLEX, 0.45, color, 2)
+        cv2.putText(frame, label, (startX, startY - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, 2)
         cv2.rectangle(frame, (startX, startY), (endX, endY), color, 2)
 
 
