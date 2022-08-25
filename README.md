@@ -5,7 +5,9 @@ It was extended later to be used on videos from camera feed in a large retail sh
 
 ## **Usage**
 
-To test out this code with pics;
+To test out this code;
+
+- Make sure you have a webcam attached to your PC or internal webcam.
 
 Clone the repository <br />
 
