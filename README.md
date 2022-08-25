@@ -3,7 +3,7 @@
 Implementation of a computer vision model for the detection of masks on customers faces.
 It was extended later to be used on videos from camera feed in a large retail shop where alerts were send when customers did not have masks. <br />
 
-##**Usage**
+## **Usage**
 
 To test out this code with pics;
 
