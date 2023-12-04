@@ -1,7 +1,7 @@
 # **Covid19-facemask-detect**
 
-Implementation of a computer vision model for the detection of masks on customers faces.
-It was extended later to be used on videos from camera feeds in a large retail shop where alerts were send when customers did not have masks. <br />
+Computer vision model for the detection of masks on customers faces.
+It was later extended in a webapp to be used on videos from camera feeds in a large retail shop where alerts were send when customers did not have masks. <br />
 
 ## **Usage**
 
